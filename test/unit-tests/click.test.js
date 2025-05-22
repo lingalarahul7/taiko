@@ -1,8 +1,8 @@
-const chai = require('chai');
+const chai = require("chai");
 const expect = chai.expect;
-const chaiAsPromised = require('chai-as-promised');
+const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
-let {
+const {
   openBrowser,
   click,
   closeBrowser,
@@ -14,14 +14,19 @@ let {
   accept,
   alert,
   evaluate,
-} = require('../../lib/taiko');
-let { createHtml, removeFile, openBrowserArgs, resetConfig } = require('./test-util');
-const test_name = 'Click';
+} = require("../../lib/taiko");
+const {
+  createHtml,
+  removeFile,
+  openBrowserArgs,
+  resetConfig,
+} = require("./test-util");
+const test_name = "Click";
 
 describe(test_name, () => {
   let filePath;
   before(async () => {
-    let innerHtml = `
+    const innerHtml = `
             <span>Click with proximity</span>
             <div>
                 <span id='something' onclick="displayText('Click works with text nodes.')">Click on text node</span>
@@ -43,6 +48,7 @@ describe(test_name, () => {
             <input onclick="displayText('Click works with text as value.')" value="Text as value"/><br/>
             <input onclick="displayText('Click works with text as type.')" type="Text as type"/><br/>
             <span onclick="displayText('Click works with proximity selector.')">Click with proximity</span>
+            <span onclick="displayText('Click works with proximity selector and options object.')">Click with proximity and options object</span>
             <div onclick="displayText('Click works with text accross element.')">
                 Text <span>accross</span> elements
             </div>
@@ -107,80 +113,102 @@ describe(test_name, () => {
     removeFile(filePath);
   });
 
-  describe('scroll to click', () => {
-    it('test if auto scrolls to element before clicking', async () => {
-      await click('Show Message');
-      expect(await text('Click works with auto scroll.').exists()).to.be.true;
+  describe("scroll to click", () => {
+    it("test if auto scrolls to element before clicking", async () => {
+      await click("Show Message");
+      expect(await text("Click works with auto scroll.").exists()).to.be.true;
     });
   });
 
-  describe('With text nodes', () => {
-    it('should click', async () => {
-      await click('on text');
-      expect(await text('Click works with text nodes.').exists()).to.be.true;
+  describe("With text nodes", () => {
+    it("should click", async () => {
+      await click("on text");
+      expect(await text("Click works with text nodes.").exists()).to.be.true;
     });
 
-    it('element click with coordinates', async () => {
+    it("element click with coordinates", async () => {
       const { x, y } = await evaluate(() => {
-        const { x, y } = document.querySelector('#something').getBoundingClientRect();
+        const { x, y } = document
+          .querySelector("#something")
+          .getBoundingClientRect();
         return { x, y };
       });
       await click({ x, y });
-      expect(await text('Click works with text nodes.').exists()).to.be.true;
+      expect(await text("Click works with text nodes.").exists()).to.be.true;
     });
   });
 
-  describe('element inside shadow dom', () => {
-    it('should click', async () => {
-      alert('Hello from the shadows', async () => {
+  describe("element inside shadow dom", () => {
+    it("should click", async () => {
+      alert("Hello from the shadows", async () => {
         await accept();
       });
-      await click(button('Shadow Click'));
+      await click(button("Shadow Click"));
     });
   });
 
-  describe('With proximity selector', () => {
-    it('should click', async () => {
-      await click('Click with proximity', below('Proximity marker'));
-      expect(await text('Click works with proximity selector.').exists()).to.be.true;
+  describe("With proximity selector", () => {
+    it("should click", async () => {
+      await click("Click with proximity", below("Proximity marker"));
+      expect(await text("Click works with proximity selector.").exists()).to.be
+        .true;
     });
   });
 
-  describe('Text accross element', () => {
-    it('should click', async () => {
-      await click('Text accross elements');
-      expect(await text('Click works with text accross element.').exists()).to.be.true;
+  describe("With proximity selector and options object", () => {
+    it("should click", async () => {
+      await click(
+        "Click with proximity and options object",
+        { waitForNavigation: true },
+        below("Proximity marker"),
+      );
+      expect(
+        await text(
+          "Click works with proximity selector and options object.",
+        ).exists(),
+      ).to.be.true;
     });
   });
 
-  describe('Text as value', () => {
-    it('should click', async () => {
-      await click('Text as value');
-      expect(await text('Click works with text as value.').exists()).to.be.true;
+  describe("Text accross element", () => {
+    it("should click", async () => {
+      await click("Text accross elements");
+      expect(await text("Click works with text accross element.").exists()).to
+        .be.true;
     });
   });
 
-  describe('With ghost element', () => {
-    it('should click the ghost element', async () => {
-      await click('Click ghost element covering text');
-      expect(await text('Click works with ghost element covering text.').exists()).to.be.true;
+  describe("Text as value", () => {
+    it("should click", async () => {
+      await click("Text as value");
+      expect(await text("Click works with text as value.").exists()).to.be.true;
+    });
+  });
+
+  describe("With ghost element", () => {
+    it("should click the ghost element", async () => {
+      await click("Click ghost element covering text");
+      expect(
+        await text("Click works with ghost element covering text.").exists(),
+      ).to.be.true;
     });
 
-    describe('With element covered by an overlay', () => {
-      it('should throw error', async () => {
-        await expect(click('Click Element covered')).to.be.rejectedWith(
+    describe("With element covered by an overlay", () => {
+      it("should throw error", async () => {
+        await expect(click("Click Element covered")).to.be.rejectedWith(
           'Element matching text "Click Element covered" is covered by other element',
         );
       });
     });
-    describe('With element disabled', () => {
-      it('should throw error if element is disabled', async () => {
-        await expect(click(button('Click me'))).to.be.rejectedWith(
-          'Button with label Click me is disabled',
+    describe("With element disabled", () => {
+      it("should throw error if element is disabled", async () => {
+        await expect(click(button("Click me"))).to.be.rejectedWith(
+          "Button with label Click me is disabled",
         );
       });
-      it('should click when forced', async () => {
-        await expect(click(button('Click me'), { force: true })).eventually.fulfilled;
+      it("should click when forced", async () => {
+        await expect(click(button("Click me"), { force: true })).eventually
+          .fulfilled;
       });
     });
   });

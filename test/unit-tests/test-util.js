@@ -1,11 +1,17 @@
-let path = require('path');
-let { writeFileSync, unlinkSync, existsSync } = require('fs');
-let { pathToFileURL, fileURLToPath } = require('url');
-let { setConfig } = require('../../lib/taiko');
+const path = require("node:path");
+const { writeFileSync, unlinkSync, existsSync } = require("node:fs");
+const { pathToFileURL, fileURLToPath } = require("node:url");
+const { setConfig } = require("../../lib/taiko");
 
 module.exports.createHtml = (innerHtml, testName) => {
-  let htmlFilePath = path.join(process.cwd(), 'test', 'unit-tests', 'data', testName + '.html');
-  let content = `
+  const htmlFilePath = path.join(
+    process.cwd(),
+    "test",
+    "unit-tests",
+    "data",
+    `${testName}.html`,
+  );
+  const content = `
 <!DOCTYPE html>
 <html>
     <head>
@@ -21,24 +27,25 @@ module.exports.createHtml = (innerHtml, testName) => {
 };
 
 module.exports.removeFile = (filePath) => {
+  let _filePath = filePath;
   try {
-    filePath = fileURLToPath(filePath);
+    _filePath = fileURLToPath(filePath);
   } catch (e) {
   } finally {
-    if (existsSync(filePath)) {
-      unlinkSync(filePath);
+    if (existsSync(_filePath)) {
+      unlinkSync(_filePath);
     }
   }
 };
 
 module.exports.openBrowserArgs = {
   args: [
-    '--disable-gpu',
-    '--disable-dev-shm-usage',
-    '--disable-setuid-sandbox',
-    '--no-first-run',
-    '--no-sandbox',
-    '--no-zygote',
+    "--disable-gpu",
+    "--disable-dev-shm-usage",
+    "--disable-setuid-sandbox",
+    "--no-first-run",
+    "--no-sandbox",
+    "--no-zygote",
   ],
 };
 

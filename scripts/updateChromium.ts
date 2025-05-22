@@ -1,8 +1,8 @@
-import { writeFileSync, readFileSync } from 'fs';
-import { execSync } from 'child_process';
-import path from 'path';
+import { execSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
 
-const PACKAGE_JSON_PATH = path.join(__dirname, '..', 'package.json');
+const PACKAGE_JSON_PATH = path.join(__dirname, "..", "package.json");
 
 interface ChromeDownload {
   platform: string;
@@ -20,15 +20,15 @@ interface ChromeReleaseInfo {
 }
 
 class ChromeUpdater {
-  private static readPackageJSON(): any {
-    return JSON.parse(readFileSync(PACKAGE_JSON_PATH, 'utf-8'));
+  private readPackageJSON() {
+    return JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
   }
 
-  private static writePackageJSON(content: any): void {
+  private writePackageJSON(content: ChromeReleaseInfo): void {
     writeFileSync(PACKAGE_JSON_PATH, `${JSON.stringify(content, null, 2)}\n`);
   }
 
-  public static async updateChromeVersion(): Promise<void> {
+  public async updateChromeVersion(): Promise<void> {
     try {
       const latestVersion = await this.fetchLatestChromeVersion();
       const currentVersion = this.getCurrentChromeVersion();
@@ -39,7 +39,9 @@ class ChromeUpdater {
       }
 
       if (currentVersion.revision < latestVersion.revision) {
-        console.log(`Updating to latest chrome version: ${latestVersion.version}`);
+        console.log(
+          `Updating to latest chrome version: ${latestVersion.version}`,
+        );
         this.updatePackageJSON(latestVersion);
         execSync(`node ${__dirname}/../lib/install.js`);
       } else {
@@ -52,12 +54,12 @@ class ChromeUpdater {
     }
   }
 
-  private static getCurrentChromeVersion(): ChromeReleaseInfo {
+  private getCurrentChromeVersion(): ChromeReleaseInfo {
     const packageJSON = this.readPackageJSON();
     return packageJSON.taiko.browser as ChromeReleaseInfo;
   }
 
-  private static updatePackageJSON(releaseInfo: ChromeReleaseInfo): void {
+  private updatePackageJSON(releaseInfo: ChromeReleaseInfo): void {
     const packageJSON = this.readPackageJSON();
     const filteredReleaseInfo: ChromeReleaseInfo = {
       version: releaseInfo.version,
@@ -68,21 +70,21 @@ class ChromeUpdater {
     this.writePackageJSON(packageJSON);
   }
 
-  private static async fetchLatestChromeVersion(): Promise<ChromeReleaseInfo> {
+  private async fetchLatestChromeVersion(): Promise<ChromeReleaseInfo> {
     const response = await fetch(
-      'https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json',
+      "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json",
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-    const versions = data.versions as ChromeReleaseInfo[];
+    const data = (await response.json()) as { versions: ChromeReleaseInfo[] };
+    const versions = data.versions;
     return versions.slice(-1)[0] as ChromeReleaseInfo;
   }
 }
 
 async function main() {
-  await ChromeUpdater.updateChromeVersion();
+  await new ChromeUpdater().updateChromeVersion();
 }
 
 main();
